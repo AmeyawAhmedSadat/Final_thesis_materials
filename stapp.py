@@ -17,8 +17,9 @@ class_names = [
 # Load data
 @st.cache_data
 def load_data():
-    data_path = "./preprocessed_predictions.csv"
+    data_path = "preprocessed_predictions.csv"  # Relative path to the file
     df = pd.read_csv(data_path)
+    # Rest of your preprocessing code...
     
     # Preprocess data
     df['date'] = pd.to_datetime(df['date'], format='%d/%m/%Y')
