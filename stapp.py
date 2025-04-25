@@ -59,7 +59,7 @@ except FileNotFoundError:
     wildcat_img = None
 
 # Add the GSOM image to the sidebar
-st.sidebar.image("GSOM.jpg", caption="Learn more about Kedrovaya Pad Nature Reserve", use_container_width=True)
+st.sidebar.image("GSOM.jpg", caption="Master's students of GSOM", use_container_width=True)
 
 # Optional: Add a hyperlink below the image if needed
 st.sidebar.markdown("[Click here to learn more about Kedrovaya Pad Nature Reserve](https://leopard-land.ru/territory/kedrpad?lang=en)")
