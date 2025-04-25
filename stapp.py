@@ -17,7 +17,7 @@ class_names = [
 # Load data
 @st.cache_data
 def load_data():
-    data_path = "/home/jovyan/__ANIMALS/datasets/preprocessed_predictions.csv"
+    data_path = "./preprocessed_predictions.csv"
     df = pd.read_csv(data_path)
     
     # Preprocess data
