@@ -128,7 +128,7 @@ def interval_to_str(interval):
 # Page 1: Overview Dashboard
 if page == "Overview Dashboard":
     st.title("🌍 Kedrovaya Pad Nature Reserve Wildlife Monitoring")
-    st.subheader("made by Ahmed & Rakhat")
+    st.subheader("Made by Ahmed & Rakhat")
     
     # Header with park info
     st.markdown("""
