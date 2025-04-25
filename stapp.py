@@ -58,9 +58,11 @@ try:
 except FileNotFoundError:
     wildcat_img = None
 
-# Sidebar configuration
-st.sidebar.image("https://via.placeholder.com/150x50?text=Kedrovaya+Pad", use_container_width=True)
-st.sidebar.markdown("### [Learn more about Kedrovaya Pad Nature Reserve](https://leopard-land.ru/territory/kedrpad?lang=en)")
+# Add the GSOM image to the sidebar
+st.sidebar.image("GSOM.jpg", caption="Learn more about Kedrovaya Pad Nature Reserve", use_container_width=True)
+
+# Optional: Add a hyperlink below the image if needed
+st.sidebar.markdown("[Click here to learn more about Kedrovaya Pad Nature Reserve](https://leopard-land.ru/territory/kedrpad?lang=en)")
 
 st.sidebar.title("Navigation")
 page = st.sidebar.radio("Select Page", [
