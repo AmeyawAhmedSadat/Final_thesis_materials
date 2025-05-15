@@ -35,13 +35,18 @@ class_names = [
 @st.cache_resource
 def load_model():
     try:
-        model = torch.hub.load('ultralytics/yolov5', 'custom', path='best.pt', force_reload=True)
+        # First try loading local model
+        model = torch.hub.load('.', 'custom', path='best.pt', source='local')
         return model
     except Exception as e:
-        st.error(f"Error loading model: {e}")
-        return None
-
-model = load_model()
+        st.warning(f"Local load failed: {e}. Trying to download YOLOv5...")
+        try:
+            model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True)
+            st.warning("Using default YOLOv5s model instead of custom model")
+            return model
+        except Exception as e:
+            st.error(f"Failed to load model: {e}")
+            return None
 
 # Load data
 @st.cache_data
