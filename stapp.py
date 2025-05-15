@@ -1,52 +1,18 @@
-# First import streamlit so we can show error messages
 import streamlit as st
-
-# Then handle other imports with error messages
-try:
-    import cv2
-except ImportError:
-    st.error("OpenCV not installed. Please run: pip install opencv-python")
-    st.stop()
-
-try:
-    import torch
-except ImportError:
-    st.error("PyTorch not installed. Please run: pip install torch torchvision")
-    st.stop()
-
-# Now import other required packages
 import pandas as pd
 import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
 from PIL import Image
-from pathlib import Path  
 
 # Used species classes in the model
 class_names = [
     "badger", "boar", "brown_bear", "hare", "lynx", "musk_deer", "otter",
-    "raccoon", "red_fox", "roe_deer_female", "roe_deer_male", "sable",
-    "sika_deer_female", "sika_deer_male", "tiger", "ussuri_bear", "wild_cat",
-    "yellow_marten"
+  "raccoon", "red_fox", "roe_deer_female", "roe_deer_male", "sable",
+  "sika_deer_female", "sika_deer_male", "tiger", "ussuri_bear", "wild_cat",
+  "yellow_marten"
 ]
-
-# Load YOLOv5 model
-@st.cache_resource
-def load_model():
-    try:
-        # First try loading local model
-        model = torch.hub.load('.', 'custom', path='best.pt', source='local')
-        return model
-    except Exception as e:
-        st.warning(f"Local load failed: {e}. Trying to download YOLOv5...")
-        try:
-            model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True)
-            st.warning("Using default YOLOv5s model instead of custom model")
-            return model
-        except Exception as e:
-            st.error(f"Failed to load model: {e}")
-            return None
 
 # Load data
 @st.cache_data
@@ -62,6 +28,7 @@ def load_data():
     df['month'] = df['date'].dt.month_name()
     df['hour'] = pd.to_datetime(df['time'].astype(str)).dt.hour
     df['day_of_week'] = df['date'].dt.day_name()
+    
     
     for class_name in class_names:
         if class_name not in df.columns:
@@ -91,81 +58,6 @@ try:
 except FileNotFoundError:
     wildcat_img = None
 
-# Custom CSS for styling
-st.markdown("""
-<style>
-    .main {
-        background-color: #f8f9fa;
-    }
-    .stButton>button {
-        background-color: #4CAF50;
-        color: white;
-        border-radius: 5px;
-        padding: 0.5rem 1rem;
-    }
-    .stButton>button:hover {
-        background-color: #45a049;
-        color: white;
-    }
-    .stSelectbox>div>div>select {
-        border-radius: 5px;
-    }
-    .stSlider>div>div>div>div {
-        background-color: #4CAF50;
-    }
-    .stRadio>div {
-        flex-direction: row;
-        display: flex;
-        gap: 10px;
-    }
-    .stRadio>div>label {
-        margin-bottom: 0;
-        padding: 0.5rem 1rem;
-        border-radius: 5px;
-        background-color: #f0f0f0;
-    }
-    .stRadio>div>label:hover {
-        background-color: #e0e0e0;
-    }
-    .stRadio>div>label[data-baseweb="radio"]>div:first-child {
-        padding-right: 0.5rem;
-    }
-    .st-bb {
-        background-color: white;
-    }
-    .st-at {
-        background-color: #4CAF50;
-    }
-    .css-1aumxhk {
-        background-color: #f0f2f6;
-        background-image: none;
-    }
-    .css-1v3fvcr {
-        padding: 2rem 1rem;
-    }
-    .css-1q8dd3e {
-        padding: 0.5rem;
-    }
-    .metric-card {
-        background-color: white;
-        border-radius: 10px;
-        padding: 15px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        text-align: center;
-    }
-    .metric-title {
-        font-size: 14px;
-        color: #7f8c8d;
-        margin-bottom: 5px;
-    }
-    .metric-value {
-        font-size: 24px;
-        font-weight: bold;
-        color: #2c3e50;
-    }
-</style>
-""", unsafe_allow_html=True)
-
 # Add the GSOM image to the sidebar
 st.sidebar.image("GSOM.jpg", caption="Master's students of GSOM", use_container_width=True)
 
@@ -178,8 +70,7 @@ page = st.sidebar.radio("Select Page", [
     "Species Analysis",
     "Temporal Patterns",
     "Environmental Factors",
-    "Population Estimation",
-    "Test Your Model"
+    "Population Estimation"
 ])
 
 # Common filters in sidebar
@@ -197,6 +88,8 @@ selected_species = st.sidebar.multiselect(
     default=animal_columns[:3]
 )
 
+
+
 # Temperature filter (only for Environmental Factors page)
 temp_range = None
 if page == "Environmental Factors":
@@ -206,8 +99,9 @@ if page == "Environmental Factors":
         "Temperature Range (°C)",
         min_value=min_temp,
         max_value=max_temp,
-        value=(min_temp, max_temp))
-    
+        value=(min_temp, max_temp)
+)
+
 # Apply filters
 filtered_df = df[
     (df['date'] >= pd.to_datetime(date_range[0])) &
@@ -231,60 +125,6 @@ def interval_to_str(interval):
         return f"{interval.left:.1f} to {interval.right:.1f}"
     return str(interval)
 
-# New Page: Test Your Model
-if page == "Test Your Model":
-    st.title("🖼️ Test the Animal Detection Model")
-    st.markdown("""
-    Upload an image to test our wildlife detection model. The model will identify animals in the image 
-    and display bounding boxes around detected animals along with confidence scores.
-    """)
-    
-    uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
-    
-    if uploaded_file is not None:
-        # Display the uploaded image
-        image = Image.open(uploaded_file)
-        st.image(image, caption="Uploaded Image", use_column_width=True)
-        
-        if model is not None:
-            # Convert PIL image to OpenCV format
-            opencv_image = np.array(image)
-            if opencv_image.shape[-1] == 4:  # If image has alpha channel
-                opencv_image = cv2.cvtColor(opencv_image, cv2.COLOR_RGBA2RGB)
-            else:
-                opencv_image = cv2.cvtColor(opencv_image, cv2.COLOR_RGB2BGR)
-            
-            # Run inference
-            results = model([opencv_image])
-            
-            # Render results
-            rendered_imgs = results.render()
-            
-            # Convert back to PIL format for display
-            output_image = Image.fromarray(cv2.cvtColor(rendered_imgs[0], cv2.COLOR_BGR2RGB))
-            
-            # Display the results
-            st.image(output_image, caption="Detection Results", use_column_width=True)
-            
-            # Show detection details
-            st.subheader("Detection Details")
-            detections = results.pandas().xyxy[0]
-            
-            if not detections.empty:
-                detections = detections[['name', 'confidence', 'xmin', 'ymin', 'xmax', 'ymax']]
-                detections['confidence'] = detections['confidence'].apply(lambda x: f"{x:.2f}")
-                st.dataframe(detections)
-                
-                # Show summary statistics
-                st.subheader("Detection Summary")
-                summary = detections['name'].value_counts().reset_index()
-                summary.columns = ['Animal', 'Count']
-                st.table(summary)
-            else:
-                st.warning("No animals detected in this image.")
-        else:
-            st.error("Model failed to load. Please check if 'best.pt' is in the correct location.")
-
 # Page 1: Overview Dashboard
 if page == "Overview Dashboard":
     st.title("🌍 Kedrovaya Pad Nature Reserve Wildlife Monitoring")
@@ -292,50 +132,24 @@ if page == "Overview Dashboard":
     
     # Header with park info
     st.markdown("""
-    <div style="background-color:#f0f2f6;padding:15px;border-radius:10px;margin-bottom:20px;">
-        <h3 style="color:#2e86c1;">About Kedrovaya Pad Nature Reserve</h3>
-        <p style="font-size:16px;">
-        Kedrovaya Pad Nature Reserve is a protected area in the Russian Far East known for its biodiversity, 
-        particularly its Amur leopard and other rare species populations. This dashboard provides insights 
-        from wildlife camera trap data collected in the reserve.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
+    **Kedrovaya Pad Nature Reserve** is a protected area in the Russian Far East known for its biodiversity, 
+    particularly its Amur leopard and other rare species populations.
+    """)
     
     # KPI Cards
     col1, col2, col3, col4 = st.columns(4)
     with col1:
-        st.markdown(f"""
-        <div class="metric-card">
-            <div class="metric-title">Total Images</div>
-            <div class="metric-value">{len(filtered_df)}</div>
-        </div>
-        """, unsafe_allow_html=True)
+        st.metric("Total Images", len(filtered_df))
     with col2:
-        st.markdown(f"""
-        <div class="metric-card">
-            <div class="metric-title">Total Detections</div>
-            <div class="metric-value">{filtered_df['total_animals'].sum()}</div>
-        </div>
-        """, unsafe_allow_html=True)
+        st.metric("Total Detections", filtered_df['total_animals'].sum())
     with col3:
-        st.markdown(f"""
-        <div class="metric-card">
-            <div class="metric-title">Unique Species</div>
-            <div class="metric-value">{len([col for col in animal_columns if filtered_df[col].sum() > 0])}</div>
-        </div>
-        """, unsafe_allow_html=True)
+        st.metric("Unique Species", len([col for col in animal_columns if filtered_df[col].sum() > 0]))
     with col4:
         no_detect = filtered_df['no animal detected'].sum() if 'no animal detected' in filtered_df.columns else 0
-        st.markdown(f"""
-        <div class="metric-card">
-            <div class="metric-title">Empty Images</div>
-            <div class="metric-value">{int(no_detect)}</div>
-        </div>
-        """, unsafe_allow_html=True)
+        st.metric("Empty Images", int(no_detect))
     
     # Detection vs Non-detection chart
-    st.subheader("📊 Detection Rate")
+    st.subheader("Detection Rate")
     if 'no animal detected' in df.columns:
         detection_data = pd.DataFrame({
             'Type': ['With Animals', 'No Animals'],
@@ -349,25 +163,18 @@ if page == "Overview Dashboard":
             x='Type',
             y='Count',
             color='Type',
-            color_discrete_sequence=['#3498db', '#e74c3c'],
             labels={'Count': 'Number of Images', 'Type': ''},
             height=400
-        )
-        fig_detect.update_layout(
-            plot_bgcolor='rgba(0,0,0,0)',
-            paper_bgcolor='rgba(0,0,0,0)',
-            font=dict(size=12)
         )
         st.plotly_chart(fig_detect, use_container_width=True)
     else:
         st.warning("No detection data available for empty images")
     
     # Top row charts
-    st.subheader("🔍 Species Insights")
     col1, col2 = st.columns([3, 2])
     
     with col1:
-        st.markdown("#### Species Distribution")
+        st.subheader("Species Distribution")
         species_counts = filtered_df[selected_species].sum().sort_values(ascending=False)
         fig1 = px.bar(
             species_counts,
@@ -377,14 +184,10 @@ if page == "Overview Dashboard":
             labels={'value': 'Count', 'index': 'Species'},
             height=400
         )
-        fig1.update_layout(
-            plot_bgcolor='rgba(0,0,0,0)',
-            paper_bgcolor='rgba(0,0,0,0)'
-        )
         st.plotly_chart(fig1, use_container_width=True)
     
     with col2:
-        st.markdown("#### Detection Confidence")
+        st.subheader("Detection Confidence")
         conf_data = filtered_df.melt(
             id_vars=['timestamp'],
             value_vars=selected_species,
@@ -401,17 +204,12 @@ if page == "Overview Dashboard":
                 labels={'species': 'Species', 'count': 'Count'},
                 height=400
             )
-            fig2.update_layout(
-                plot_bgcolor='rgba(0,0,0,0)',
-                paper_bgcolor='rgba(0,0,0,0)',
-                showlegend=False
-            )
             st.plotly_chart(fig2, use_container_width=True)
         else:
             st.warning("No detection data for selected species")
     
     # Bottom row charts
-    st.subheader("📅 Detection Timeline")
+    st.subheader("Detection Timeline")
     timeline_data = filtered_df.groupby('date')['total_animals'].sum().reset_index()
     fig3 = px.line(
         timeline_data,
@@ -419,12 +217,6 @@ if page == "Overview Dashboard":
         y='total_animals',
         labels={'total_animals': 'Daily Detections', 'date': 'Date'},
         height=300
-    )
-    fig3.update_traces(line_color='#27ae60', line_width=2)
-    fig3.update_layout(
-        plot_bgcolor='rgba(0,0,0,0)',
-        paper_bgcolor='rgba(0,0,0,0)',
-        hovermode='x unified'
     )
     st.plotly_chart(fig3, use_container_width=True)
 
@@ -516,6 +308,7 @@ elif page == "Species Analysis":
             try:
                 import networkx as nx
                 G = nx.Graph()
+                
                 
                 for i in range(len(cooccurrence)):
                     for j in range(i+1, len(cooccurrence)):
@@ -855,10 +648,5 @@ elif page == "Population Estimation":
 
 # Footer
 st.sidebar.markdown("---")
-st.sidebar.markdown("""
-<div style="text-align:center;padding:10px;">
-    <p style="color:#7f8c8d;font-size:14px;">Kedrovaya Pad Nature Reserve</p>
-    <p style="color:#7f8c8d;font-size:12px;">Wildlife Monitoring Dashboard</p>
-    <p style="color:#7f8c8d;font-size:11px;">Data last updated: {}</p>
-</div>
-""".format(datetime.now().strftime('%Y-%m-%d')), unsafe_allow_html=True)
+st.sidebar.markdown("Kedrovaya Pad Nature Reserve Wildlife Monitoring")
+st.sidebar.markdown(f"Data last updated: {datetime.now().strftime('%Y-%m-%d')}")
