@@ -1,3 +1,7 @@
+# First import streamlit so we can show error messages
+import streamlit as st
+
+# Then handle other imports with error messages
 try:
     import cv2
 except ImportError:
@@ -10,15 +14,14 @@ except ImportError:
     st.error("PyTorch not installed. Please run: pip install torch torchvision")
     st.stop()
 
-# Rest of your imports
-import streamlit as st
+# Now import other required packages
 import pandas as pd
 import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
 from PIL import Image
-from pathlib import Path
+from pathlib import Path  
 
 # Used species classes in the model
 class_names = [
