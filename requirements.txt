@@ -1,6 +1,8 @@
-streamlit
+opencv-python
+torch
+torchvision
 pandas
 numpy
 plotly
+streamlit
 Pillow
-networkx
