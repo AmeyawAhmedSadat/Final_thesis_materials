@@ -1,3 +1,16 @@
+try:
+    import cv2
+except ImportError:
+    st.error("OpenCV not installed. Please run: pip install opencv-python")
+    st.stop()
+
+try:
+    import torch
+except ImportError:
+    st.error("PyTorch not installed. Please run: pip install torch torchvision")
+    st.stop()
+
+# Rest of your imports
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -5,8 +18,6 @@ import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
 from PIL import Image
-import cv2
-import torch
 from pathlib import Path
 
 # Used species classes in the model
